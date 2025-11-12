@@ -40,7 +40,9 @@ function App() {
   const {
     scores,
     currentRound,
-    actions: { selectChoice, playAgain, resetScores },
+    featureFlags,
+    personalityEnabled,
+    actions: { selectChoice, playAgain, resetScores, togglePersonality },
   } = useRPSGame();
 
   const canPlayAgain = Boolean(currentRound.playerChoice || currentRound.computerChoice);
@@ -80,6 +82,8 @@ function App() {
               playerChoice={currentRound.playerChoice}
               computerChoice={currentRound.computerChoice}
               outcomeText={currentRound.text}
+              outcome={currentRound.outcome}
+              aiPersonalityOn={featureFlags?.hasAiPersonality && personalityEnabled}
             />
 
             <ScoreBoard
@@ -92,6 +96,9 @@ function App() {
               canPlayAgain={canPlayAgain}
               onPlayAgain={playAgain}
               onReset={resetScores}
+              hasAiPersonality={featureFlags?.hasAiPersonality}
+              personalityEnabled={personalityEnabled}
+              onTogglePersonality={togglePersonality}
             />
           </div>
         </Card>
