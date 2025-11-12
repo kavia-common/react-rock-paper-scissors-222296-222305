@@ -165,21 +165,18 @@ function Login() {
                   aria-describedby={animeError ? 'anime-error' : undefined}
                   tabIndex={0}
                   onFocus={() => setTouched((t) => ({ ...t, anime: true }))}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-                    gap: 'var(--space-3)',
-                  }}
+                  className="anime-grid"
                 >
-                  {animeOptions.map((opt) => {
+                  {animeOptions.map((opt, index) => {
                     const selected = selectedAnime?.id === opt.id;
                     return (
                       <div
                         key={opt.id}
                         role="option"
                         aria-selected={selected ? 'true' : 'false'}
-                        aria-label={opt.label}
-                        tabIndex={0}
+                        aria-label={`${opt.label}${selected ? ' (selected)' : ''}`}
+                        data-selected={selected ? 'true' : 'false'}
+                        tabIndex={index === 0 ? 0 : -1}
                         onKeyDown={(e) => handleCardKeyDown(e, opt)}
                         onClick={() => {
                           setSelectedAnime(opt);
@@ -187,49 +184,20 @@ function Login() {
                           setAnnounce(`${opt.label} selected`);
                         }}
                         title={opt.label}
-                        style={{
-                          cursor: 'pointer',
-                          borderRadius: '12px',
-                          border: selected ? '2px solid var(--color-primary)' : '1px solid rgba(0,0,0,0.1)',
-                          background: 'var(--color-surface)',
-                          boxShadow: selected ? '0 0 0 3px var(--ring-color)' : 'var(--shadow-sm)',
-                          overflow: 'hidden',
-                          transition: 'transform .12s ease, box-shadow .2s ease, border-color .15s ease',
-                        }}
+                        className="anime-card"
                       >
-                        <div
-                          style={{
-                            width: '100%',
-                            aspectRatio: '16 / 10',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            background: 'var(--color-surface)',
-                          }}
-                          aria-hidden="true"
-                        >
+                        <div className="anime-card__media" aria-hidden="true">
                           <img
                             src={opt.img || placeholderImg}
-                            alt={`${opt.label} cover`}
+                            alt={opt.label}
                             loading="lazy"
                             decoding="async"
-                            style={{
-                              position: 'absolute',
-                              inset: 0,
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              display: 'block'
-                            }}
                           />
                         </div>
                         <div
-                          style={{
-                            padding: '0.5rem 0.75rem',
-                            fontWeight: 600,
-                            textAlign: 'center',
-                            color: 'var(--color-text)',
-                            background: selected ? 'rgba(37,99,235,0.06)' : 'transparent',
-                          }}
+                          className="anime-card__label"
+                          aria-hidden="true"
+                          title={opt.label}
                         >
                           {opt.label}
                         </div>
