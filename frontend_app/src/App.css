@@ -1,4 +1,5 @@
 /* App-level composition and page sections for Ocean Professional */
+/* This file refines component-level styles. Global tokens live in src/index.css */
 
 .App {
   min-height: 100vh;
@@ -6,8 +7,13 @@
   grid-template-rows: auto 1fr;
 }
 
-.App__main {
-  /* Gradient background field lives on the main container via index.css .container-center */
+/* Subtle page gradient on the main area for depth */
+.App__main.container-center {
+  /* Preserve existing radial highlights (from index.css) and add a faint vertical wash */
+  background:
+    linear-gradient(180deg, rgba(37,99,235,0.06) 0%, rgba(255,255,255,0) 40%),
+    radial-gradient(1200px 600px at 50% -100px, rgba(37,99,235,0.08), transparent),
+    radial-gradient(800px 400px at 110% 50%, rgba(245,158,11,0.08), transparent);
 }
 
 /* Motion-safe defaults */
@@ -57,25 +63,24 @@
   }
 }
 
-/* Theme toggle improvements for contrast and touch target */
+/* Theme toggle: refined radii and shadow for modern look */
 .theme-toggle {
   appearance: none;
-  border: 1px solid transparent;
+  border: 1px solid rgba(0,0,0,0.08);
   background: var(--color-surface);
   color: var(--color-text);
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.625rem 1rem; /* larger tap target */
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
   box-shadow: var(--shadow-sm);
-  border-color: rgba(0,0,0,0.12);
   min-height: 44px; /* WCAG touch target */
 }
 
 .theme-toggle:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 
 .theme-toggle:active {
@@ -83,9 +88,10 @@
 }
 
 .theme-toggle__icon {
-  margin-right: 0.45rem;
+  margin-right: 0.5rem;
 }
 
+/* Card header and titles */
 .rps-card__header {
   display: flex;
   align-items: flex-start;
@@ -97,8 +103,9 @@
 
 .rps-card__title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.4rem);
   font-weight: 800;
+  letter-spacing: -0.01em;
   color: var(--color-text);
 }
 
@@ -108,42 +115,19 @@
   color: var(--color-text-muted);
 }
 
-/* Placeholder styles for content area to verify layout visually */
-.placeholder {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.placeholder .row {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.placeholder .chip {
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(37,99,235,0.08);
-  color: var(--color-primary);
-  font-weight: 600;
-  border: 1px solid rgba(37,99,235,0.18);
-}
-
-.placeholder .note {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-}
-
 /* Choice button subtle press & hover effect extensions */
 .choice-btn {
   position: relative;
   transition: transform .12s ease, box-shadow .2s ease, background-color .15s ease, color .15s ease, border-color .15s ease;
   will-change: transform;
   min-height: 44px; /* accessible target */
+  border-radius: var(--radius-md);
+  background: linear-gradient(0deg, rgba(37,99,235,0.04), rgba(37,99,235,0.04)) transparent;
 }
 
 .choice-btn:hover:not(:disabled) {
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37,99,235,0.18);
 }
 
 .choice-btn:active:not(:disabled) {
@@ -157,10 +141,10 @@
 
 /* Result panel reveal styling hook */
 .result-panel {
-  border: 1px solid var(--border-color, rgba(0,0,0,0.08));
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: var(--radius-md);
   padding: var(--space-4);
-  background: rgba(0,0,0,0.02);
+  background: linear-gradient(180deg, rgba(17,24,39,0.02), rgba(17,24,39,0.01));
 }
 
 /* ScoreBoard highlight hook for incremented score */
@@ -184,7 +168,7 @@
   }
 
   .rps-card__title {
-    font-size: 1.125rem;
+    font-size: 1.1rem;
   }
 
   /* Reduce gap to fit content better */
@@ -195,10 +179,10 @@
 
 /* High contrast for outline buttons against dark backgrounds */
 .btn--outline {
-  /* visual states for contrast */
   --_outline-color: var(--color-primary);
   background: transparent;
   color: var(--_outline-color);
   border-color: var(--_outline-color);
   box-shadow: none;
+  border-radius: var(--radius-md);
 }
