@@ -69,18 +69,20 @@ function App() {
           title={`Logged in as ${profile.name}`}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--color-text-muted)', fontWeight: 600 }}
         >
-          {profile?.animeImageUrl ? (
-            <img
-              src={profile.animeImageUrl}
-              alt={profile.anime ? `${profile.anime} avatar` : 'Profile avatar'}
-              width="28"
-              height="28"
-              style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.1)' }}
-            />
-          ) : null}
-          <span>
-            {profile.name} {profile.anime ? `• ${profile.anime}` : ''}
-          </span>
+          {(() => {
+            // Prefer new imageUrl; fallback to legacy animeImageUrl for compatibility
+            const imgUrl = profile?.imageUrl || profile?.animeImageUrl;
+            return imgUrl ? (
+              <img
+                src={imgUrl}
+                alt="Profile avatar"
+                width="28"
+                height="28"
+                style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.1)' }}
+              />
+            ) : null;
+          })()}
+          <span>{profile.name}</span>
         </span>
       )}
       <button

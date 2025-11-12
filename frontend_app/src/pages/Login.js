@@ -3,24 +3,22 @@ import Card from '../components/Layout/Card';
 import Header from '../components/Layout/Header';
 import { login as authLogin, saveUserProfile } from '../utils/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
-import narutoImg from '../assets/anime/naruto.png';
-import onePieceImg from '../assets/anime/one-piece.png';
-import demonSlayerImg from '../assets/anime/demon-slayer.png';
-import aotImg from '../assets/anime/attack-on-titan.png';
-import mhaImg from '../assets/anime/my-hero-academia.png';
+import aiBlue from '../assets/anime/ai-bot-blue.png';
+import aiGold from '../assets/anime/ai-bot-gold.png';
+import aiRed from '../assets/anime/ai-bot-red.png';
 import placeholderImg from '../assets/anime/placeholder.png';
 
 /**
  * PUBLIC_INTERFACE
- * Login - A centered, themed login page that collects a display name and an anime selection.
- * Now presents anime options as selectable image cards with keyboard accessibility.
- * On submit, persists { isAuthed: true, name, anime, animeImageUrl } to client-side auth storage and routes via existing gating.
+ * Login - A centered, themed login page that collects a display name and an AI avatar selection.
+ * Presents AI-themed avatars as selectable image cards with full keyboard accessibility.
+ * On submit, persists { id, name, imageUrl } to client-side auth storage via saveUserProfile for downstream use.
  */
 function Login() {
   const [theme, setTheme] = useState('light');
   const [name, setName] = useState('');
-  const [selectedAnime, setSelectedAnime] = useState(null); // { id, label, img }
-  const [touched, setTouched] = useState({ name: false, anime: false });
+  const [selectedAvatar, setSelectedAvatar] = useState(null); // { id, name, imageUrl }
+  const [touched, setTouched] = useState({ name: false, avatar: false });
   const [submitted, setSubmitted] = useState(false);
   const [announce, setAnnounce] = useState('');
   const navigate = useNavigate();
@@ -32,19 +30,22 @@ function Login() {
     document.documentElement.setAttribute('data-theme', next);
   };
 
-  // Grid options with images
-  const animeOptions = useMemo(() => ([
-    { id: 'naruto', label: 'Naruto', img: narutoImg || placeholderImg },
-    { id: 'one-piece', label: 'One Piece', img: onePieceImg || placeholderImg },
-    { id: 'demon-slayer', label: 'Demon Slayer', img: demonSlayerImg || placeholderImg },
-    { id: 'attack-on-titan', label: 'Attack on Titan', img: aotImg || placeholderImg },
-    { id: 'my-hero-academia', label: 'My Hero Academia', img: mhaImg || placeholderImg },
-  ]), []);
+  // Grid options with images (AI avatars)
+  const avatarOptions = useMemo(
+    () => [
+      { id: 'ai-blue', name: 'AI Bot - Blue', imageUrl: aiBlue || placeholderImg },
+      { id: 'ai-gold', name: 'AI Bot - Gold', imageUrl: aiGold || placeholderImg },
+      { id: 'ai-red', name: 'AI Bot - Red', imageUrl: aiRed || placeholderImg },
+    ],
+    []
+  );
 
   // Validation
-  const nameError = (touched.name || submitted) ? (!name.trim() ? 'Please enter your name.' : '') : '';
-  const animeError = (touched.anime || submitted) ? (!selectedAnime ? 'Please select your favorite anime.' : '') : '';
-  const hasErrors = Boolean(nameError || animeError);
+  const nameError =
+    touched.name || submitted ? (!name.trim() ? 'Please enter your name.' : '') : '';
+  const avatarError =
+    touched.avatar || submitted ? (!selectedAvatar ? 'Please select an AI avatar.' : '') : '';
+  const hasErrors = Boolean(nameError || avatarError);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -53,17 +54,21 @@ function Login() {
       if (nameError) {
         const el = document.getElementById('name');
         if (el) el.focus();
-      } else if (animeError) {
-        const el = document.getElementById('anime-grid');
+      } else if (avatarError) {
+        const el = document.getElementById('avatar-grid');
         if (el) el.focus();
       }
       return;
     }
-    // Persist profile and set auth flag
+    // Persist profile and set auth flag using new structure
+    // saveUserProfile historically stored { name, anime, animeImageUrl }.
+    // We now store: { id, name, imageUrl } while maintaining keys used by the rest of the app.
     saveUserProfile({
       name: name.trim(),
-      anime: selectedAnime?.id || '',
-      animeImageUrl: selectedAnime?.img || '',
+      anime: selectedAvatar?.id || '', // kept for backward compatibility in storage
+      animeImageUrl: selectedAvatar?.imageUrl || '', // kept for header image until header is fully migrated
+      id: selectedAvatar?.id || '',
+      imageUrl: selectedAvatar?.imageUrl || '',
     });
     authLogin();
     setAnnounce('Welcome! Profile saved. Redirecting to the game.');
@@ -89,9 +94,9 @@ function Login() {
   const handleCardKeyDown = (e, opt) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      setSelectedAnime(opt);
-      setTouched((t) => ({ ...t, anime: true }));
-      setAnnounce(`${opt.label} selected`);
+      setSelectedAvatar(opt);
+      setTouched((t) => ({ ...t, avatar: true }));
+      setAnnounce(`${opt.name} selected`);
     }
   };
 
@@ -103,7 +108,9 @@ function Login() {
           <div className="rps-card__header">
             <div>
               <h2 className="rps-card__title" id="login-title">Welcome</h2>
-              <p className="rps-card__subtitle" id="login-desc">Enter your name and pick an anime to continue</p>
+              <p className="rps-card__subtitle" id="login-desc">
+                Enter your name and choose an AI avatar to continue
+              </p>
             </div>
             <div aria-hidden />
           </div>
@@ -154,42 +161,44 @@ function Login() {
               </div>
 
               <fieldset
-                id="anime-grid"
-                aria-label="Favorite Anime"
+                id="avatar-grid"
+                aria-label="AI Avatar"
                 style={{ border: 'none', padding: 0, margin: 0 }}
               >
-                <legend style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>Favorite Anime</legend>
+                <legend style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
+                  AI Avatar
+                </legend>
                 <div
                   role="listbox"
-                  aria-label="Anime choices"
-                  aria-describedby={animeError ? 'anime-error' : undefined}
+                  aria-label="AI avatar choices"
+                  aria-describedby={avatarError ? 'avatar-error' : undefined}
                   tabIndex={0}
-                  onFocus={() => setTouched((t) => ({ ...t, anime: true }))}
+                  onFocus={() => setTouched((t) => ({ ...t, avatar: true }))}
                   className="anime-grid"
                 >
-                  {animeOptions.map((opt, index) => {
-                    const selected = selectedAnime?.id === opt.id;
+                  {avatarOptions.map((opt, index) => {
+                    const selected = selectedAvatar?.id === opt.id;
                     return (
                       <div
                         key={opt.id}
                         role="option"
                         aria-selected={selected ? 'true' : 'false'}
-                        aria-label={`${opt.label}${selected ? ' (selected)' : ''}`}
+                        aria-label={`${opt.name}${selected ? ' (selected)' : ''}`}
                         data-selected={selected ? 'true' : 'false'}
                         tabIndex={index === 0 ? 0 : -1}
                         onKeyDown={(e) => handleCardKeyDown(e, opt)}
                         onClick={() => {
-                          setSelectedAnime(opt);
-                          setTouched((t) => ({ ...t, anime: true }));
-                          setAnnounce(`${opt.label} selected`);
+                          setSelectedAvatar(opt);
+                          setTouched((t) => ({ ...t, avatar: true }));
+                          setAnnounce(`${opt.name} selected`);
                         }}
-                        title={opt.label}
+                        title={opt.name}
                         className="anime-card"
                       >
                         <div className="anime-card__media" aria-hidden="true">
                           <img
-                            src={opt.img || placeholderImg}
-                            alt={opt.label}
+                            src={opt.imageUrl || placeholderImg}
+                            alt={opt.name}
                             loading="lazy"
                             decoding="async"
                           />
@@ -197,16 +206,16 @@ function Login() {
                         <div
                           className="anime-card__label"
                           aria-hidden="true"
-                          title={opt.label}
+                          title={opt.name}
                         >
-                          {opt.label}
+                          {opt.name}
                         </div>
                       </div>
                     );
                   })}
                 </div>
                 <div
-                  id="anime-error"
+                  id="avatar-error"
                   role="alert"
                   aria-live="polite"
                   style={{
@@ -216,7 +225,7 @@ function Login() {
                     fontSize: '0.9rem',
                   }}
                 >
-                  {animeError}
+                  {avatarError}
                 </div>
               </fieldset>
 

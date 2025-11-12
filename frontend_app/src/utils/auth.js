@@ -61,20 +61,31 @@ export function subscribeAuth(cb) {
   return () => window.removeEventListener('storage', handler);
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ */
 export function saveUserProfile(profile) {
   /**
    * Saves user profile metadata to localStorage.
    * PUBLIC_INTERFACE
-   * profile: { name: string, anime: string, animeImageUrl?: string }
-   * animeImageUrl is optional and used for displaying the selected anime image in the UI.
+   * Accepts legacy and new fields. Normalized shape saved:
+   * - name: string
+   * - id: string (avatar id)    [new]
+   * - imageUrl: string          [new]
+   * - anime: string             [legacy mirror of id]
+   * - animeImageUrl: string     [legacy mirror of imageUrl]
    */
   try {
     if (typeof window === 'undefined' || !window.localStorage) return;
+    const id = String(profile?.id || profile?.anime || '').slice(0, 100);
+    const imageUrl = String(profile?.imageUrl || profile?.animeImageUrl || '').slice(0, 500);
     const safe = {
       name: String(profile?.name || '').slice(0, 100),
-      anime: String(profile?.anime || '').slice(0, 100),
-      animeImageUrl: String(profile?.animeImageUrl || '').slice(0, 500),
+      id,
+      imageUrl,
+      // keep legacy keys for compatibility with any older UI references
+      anime: id,
+      animeImageUrl: imageUrl,
     };
     window.localStorage.setItem(PROFILE_KEY, JSON.stringify(safe));
   } catch {
@@ -82,12 +93,16 @@ export function saveUserProfile(profile) {
   }
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ */
 export function getUserProfile() {
   /**
    * Retrieves saved user profile, or null if unavailable/invalid.
    * PUBLIC_INTERFACE
-   * Returns: { name: string, anime: string, animeImageUrl?: string } | null
+   * Returns normalized: { name: string, id: string, imageUrl: string, anime: string, animeImageUrl: string } | null
+   * - id/imageUrl are preferred new fields
+   * - anime/animeImageUrl are kept for backward compatibility
    */
   try {
     if (typeof window === 'undefined' || !window.localStorage) return null;
@@ -95,10 +110,17 @@ export function getUserProfile() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     const name = typeof parsed?.name === 'string' ? parsed.name : '';
-    const anime = typeof parsed?.anime === 'string' ? parsed.anime : '';
-    const animeImageUrl = typeof parsed?.animeImageUrl === 'string' ? parsed.animeImageUrl : '';
-    if (!name && !anime) return null;
-    return { name, anime, animeImageUrl };
+    const id = typeof parsed?.id === 'string' ? parsed.id : (typeof parsed?.anime === 'string' ? parsed.anime : '');
+    const imageUrl =
+      typeof parsed?.imageUrl === 'string'
+        ? parsed.imageUrl
+        : (typeof parsed?.animeImageUrl === 'string' ? parsed.animeImageUrl : '');
+    const anime = typeof parsed?.anime === 'string' ? parsed.anime : id;
+    const animeImageUrl =
+      typeof parsed?.animeImageUrl === 'string' ? parsed.animeImageUrl : imageUrl;
+
+    if (!name && !id && !anime) return null;
+    return { name, id, imageUrl, anime, animeImageUrl };
   } catch {
     return null;
   }
