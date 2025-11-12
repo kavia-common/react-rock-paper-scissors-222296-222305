@@ -67,8 +67,8 @@ function App() {
         <Card>
           <div className="rps-card__header">
             <div>
-              <h2 className="rps-card__title">Play a Round</h2>
-              <p className="rps-card__subtitle">Choose Rock, Paper, or Scissors</p>
+              <h2 className="rps-card__title" id="play-round-title">Play a Round</h2>
+              <p className="rps-card__subtitle" id="play-round-desc">Choose Rock, Paper, or Scissors</p>
             </div>
             <div aria-hidden />
           </div>

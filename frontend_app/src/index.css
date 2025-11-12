@@ -130,14 +130,15 @@ a:hover {
   appearance: none;
   border: 1px solid transparent;
   background: var(--color-primary);
-  color: white;
-  font-weight: 600;
-  padding: 0.55rem 0.9rem;
-  border-radius: 10px;
+  color: #ffffff; /* strong contrast on primary */
+  font-weight: 700;
+  padding: 0.625rem 1rem; /* enlarge for touch */
+  border-radius: 12px;
   cursor: pointer;
   transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   will-change: transform, box-shadow;
+  min-height: 44px; /* WCAG touch target */
 }
 
 .btn:hover {
@@ -189,6 +190,6 @@ a:hover {
 /* Focus ring */
 :focus-visible {
   outline: 2px solid transparent;
-  box-shadow: 0 0 0 3px var(--ring-color);
+  box-shadow: 0 0 0 3px var(--ring-color), 0 0 0 5px rgba(0,0,0,0.06);
   border-radius: 8px;
 }

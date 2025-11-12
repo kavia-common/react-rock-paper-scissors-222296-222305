@@ -21,25 +21,25 @@ function ControlsBar({ canPlayAgain, onPlayAgain, onReset }) {
         flexWrap: 'wrap',
       }}
     >
-      {canPlayAgain && (
+      {canPlayAgain ? (
         <button
           type="button"
           className="btn"
           onClick={onPlayAgain}
           aria-label="Play again"
           title="Play again"
+          style={{ minHeight: 44 }}
         >
           Play Again
         </button>
-      )}
-      {!canPlayAgain && (
+      ) : (
         <button
           type="button"
           className="btn"
           aria-label="Play again (disabled until you play)"
           title="Play again (disabled until you play)"
           disabled
-          style={{ opacity: 0.6 }}
+          style={{ opacity: 0.6, minHeight: 44 }}
         >
           Play Again
         </button>
@@ -50,6 +50,7 @@ function ControlsBar({ canPlayAgain, onPlayAgain, onReset }) {
         onClick={onReset}
         aria-label="Reset score"
         title="Reset score"
+        style={{ minHeight: 44 }}
       >
         Reset Score
       </button>

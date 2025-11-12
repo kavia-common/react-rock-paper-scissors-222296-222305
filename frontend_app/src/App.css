@@ -57,18 +57,20 @@
   }
 }
 
+/* Theme toggle improvements for contrast and touch target */
 .theme-toggle {
   appearance: none;
   border: 1px solid transparent;
   background: var(--color-surface);
   color: var(--color-text);
   font-weight: 600;
-  padding: 0.5rem 0.8rem;
-  border-radius: 10px;
+  padding: 0.625rem 1rem; /* larger tap target */
+  border-radius: 12px;
   cursor: pointer;
   transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
   box-shadow: var(--shadow-sm);
-  border-color: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.12);
+  min-height: 44px; /* WCAG touch target */
 }
 
 .theme-toggle:hover {
@@ -86,21 +88,22 @@
 
 .rps-card__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
+  flex-wrap: wrap;
 }
 
 .rps-card__title {
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   color: var(--color-text);
 }
 
 .rps-card__subtitle {
-  margin: 0;
+  margin: 0.25rem 0 0 0;
   font-size: 0.95rem;
   color: var(--color-text-muted);
 }
@@ -136,6 +139,7 @@
   position: relative;
   transition: transform .12s ease, box-shadow .2s ease, background-color .15s ease, color .15s ease, border-color .15s ease;
   will-change: transform;
+  min-height: 44px; /* accessible target */
 }
 
 .choice-btn:hover:not(:disabled) {
@@ -163,4 +167,38 @@
 .score-flash {
   /* Base, will be animated with .animate-pulse-once when value changes */
   transition: outline-color .2s ease, transform .15s ease;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 480px) {
+  .rps-header__content {
+    grid-template-columns: 1fr; /* stack title and actions */
+  }
+
+  .rps-header__actions {
+    justify-content: flex-start;
+  }
+
+  .rps-card {
+    padding: 1rem;
+  }
+
+  .rps-card__title {
+    font-size: 1.125rem;
+  }
+
+  /* Reduce gap to fit content better */
+  .result-panel {
+    padding: 0.75rem;
+  }
+}
+
+/* High contrast for outline buttons against dark backgrounds */
+.btn--outline {
+  /* visual states for contrast */
+  --_outline-color: var(--color-primary);
+  background: transparent;
+  color: var(--_outline-color);
+  border-color: var(--_outline-color);
+  box-shadow: none;
 }

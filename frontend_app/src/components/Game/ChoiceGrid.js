@@ -26,7 +26,7 @@ function ChoiceGrid({ onSelect, disabled }) {
         gap: 'var(--space-3)',
       }}
     >
-      {choices.map((c) => (
+      {choices.map((c, idx) => (
         <ChoiceButton
           key={c.value}
           label={c.label}
@@ -34,6 +34,8 @@ function ChoiceGrid({ onSelect, disabled }) {
           icon={c.icon}
           onSelect={onSelect}
           disabled={disabled}
+          // Provide simple roving tabindex for accessibility
+          tabIndex={idx === 0 ? 0 : -1}
         />
       ))}
     </div>

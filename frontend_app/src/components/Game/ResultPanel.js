@@ -17,29 +17,31 @@ function ResultPanel({ playerChoice, computerChoice, outcomeText }) {
   };
 
   return (
-    <div
+    <section
       role="status"
       aria-live="polite"
+      aria-atomic="true"
       className="result-panel animate-fade-in-up"
       style={{
         display: 'grid',
         gap: 'var(--space-3)',
       }}
     >
+      <h2 className="visually-hidden">Round Results</h2>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-        <div>
+        <div aria-label={`Player choice ${pretty(playerChoice)}`}>
           <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Player chose</div>
           <div style={{ fontWeight: 700 }}>{pretty(playerChoice)}</div>
         </div>
-        <div>
+        <div aria-label={`Computer choice ${pretty(computerChoice)}`}>
           <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Computer chose</div>
           <div style={{ fontWeight: 700 }}>{pretty(computerChoice)}</div>
         </div>
       </div>
-      <div style={{ fontWeight: 700 }}>
+      <p style={{ fontWeight: 700, margin: 0 }}>
         {outcomeText || 'Make a selection to play a round.'}
-      </div>
-    </div>
+      </p>
+    </section>
   );
 }
 
