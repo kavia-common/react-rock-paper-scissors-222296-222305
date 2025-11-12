@@ -201,10 +201,27 @@ function Login() {
                           style={{
                             width: '100%',
                             aspectRatio: '16 / 10',
-                            background: `center / cover no-repeat url(${opt.img || placeholderImg})`,
+                            position: 'relative',
+                            overflow: 'hidden',
+                            background: 'var(--color-surface)',
                           }}
                           aria-hidden="true"
-                        />
+                        >
+                          <img
+                            src={opt.img || placeholderImg}
+                            alt={`${opt.label} cover`}
+                            loading="lazy"
+                            decoding="async"
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block'
+                            }}
+                          />
+                        </div>
                         <div
                           style={{
                             padding: '0.5rem 0.75rem',
