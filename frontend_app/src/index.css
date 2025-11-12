@@ -1,13 +1,185 @@
+/* Ocean Professional Theme - Global Base Styles and Tokens (globals) */
+
+/* Theme tokens */
+:root {
+  --color-primary: #2563EB;    /* primary */
+  --color-secondary: #F59E0B;  /* secondary / success accent */
+  --color-error: #EF4444;      /* error */
+  --color-bg: #f9fafb;         /* background */
+  --color-surface: #ffffff;    /* surface */
+  --color-text: #111827;       /* text */
+  --color-text-muted: #6b7280; /* gray-500 */
+  --ring-color: rgba(37, 99, 235, 0.5);
+
+  /* Elevation and radii */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 8px 20px rgba(0,0,0,0.08);
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Spacing scale */
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Typography */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+}
+
+[data-theme="dark"] {
+  /* Optional dark mode tokens maintaining brand hues */
+  --color-bg: #0f172a;         /* slate-900-ish */
+  --color-surface: #111827;    /* near slate-800 */
+  --color-text: #e5e7eb;       /* gray-200 */
+  --color-text-muted: #9CA3AF;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 8px 20px rgba(0,0,0,0.35);
+  --ring-color: rgba(59, 130, 246, 0.6);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Utility classes */
+.container-center {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: var(--space-8) var(--space-4);
+  background: radial-gradient(1200px 600px at 50% -100px, rgba(37,99,235,0.08), transparent),
+              radial-gradient(800px 400px at 110% 50%, rgba(245,158,11,0.08), transparent);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Header styles shared across app */
+.rps-header {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto var(--space-6) auto;
+  padding: var(--space-4) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rps-header__content {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.rps-header__title {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.2rem + 0.8vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.rps-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Card styles shared across app */
+.rps-card {
+  width: 100%;
+  max-width: 720px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: clamp(1rem, 1rem + 1vw, 2rem);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Button base */
+.btn {
+  appearance: none;
+  border: 1px solid transparent;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+.btn--warning {
+  background: var(--color-secondary);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+.btn--danger {
+  background: var(--color-error);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px var(--ring-color);
+  border-radius: 8px;
 }
