@@ -6,12 +6,12 @@ import PropTypes from 'prop-types';
  * Card component that provides a surface with padding, rounded corners,
  * and subtle shadow following the Ocean Professional theme.
  */
-function Card({ children, className, as: Tag }) {
+function Card({ children, className, as: Tag, ariaLabel }) {
   return (
     <Tag
       className={`rps-card animate-pop ${className || ''}`.trim()}
       role="region"
-      aria-label="Game Area"
+      aria-label={ariaLabel || 'Content Area'}
     >
       {children}
     </Tag>
@@ -21,13 +21,15 @@ function Card({ children, className, as: Tag }) {
 Card.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
-  as: PropTypes.oneOfType([PropTypes.string, PropTypes.elementType])
+  as: PropTypes.oneOfType([PropTypes.string, PropTypes.elementType]),
+  ariaLabel: PropTypes.string
 };
 
 Card.defaultProps = {
   children: null,
   className: '',
-  as: 'section'
+  as: 'section',
+  ariaLabel: 'Content Area'
 };
 
 export default Card;

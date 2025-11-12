@@ -52,17 +52,28 @@ function App() {
       <Header
         title="Rock Paper Scissors"
         actions={
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${themeLabel} mode`}
-            title={`Switch to ${themeLabel} mode`}
-          >
-            <span className="theme-toggle__icon" aria-hidden>
-              {theme === 'light' ? '🌙' : '☀️'}
-            </span>
-            {themeLabel} Mode
-          </button>
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${themeLabel} mode`}
+              title={`Switch to ${themeLabel} mode`}
+            >
+              <span className="theme-toggle__icon" aria-hidden>
+                {theme === 'light' ? '🌙' : '☀️'}
+              </span>
+              {themeLabel} Mode
+            </button>
+            <a
+              href="/login"
+              className="btn btn--outline"
+              aria-label="Go to Login"
+              title="Go to Login"
+              style={{ minHeight: 44 }}
+            >
+              Login
+            </a>
+          </div>
         }
       />
       <main className="App__main container-center">
