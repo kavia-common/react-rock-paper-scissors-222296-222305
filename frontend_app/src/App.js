@@ -10,19 +10,16 @@ import ResultPanel from './components/Game/ResultPanel';
 import ScoreBoard from './components/Game/ScoreBoard';
 import ControlsBar from './components/Game/ControlsBar';
 
+// Step 3: game hook
+import useRPSGame from './hooks/useRPSGame';
+
 /**
  * PUBLIC_INTERFACE
  * App entry: sets up theme and renders the centered layout scaffolding.
- * Currently wires core game components with stub props; game logic arrives in Step 3.
+ * Wires game components to the useRPSGame hook for gameplay and state.
  */
 function App() {
   const [theme, setTheme] = useState('light');
-
-  // temporary local stub state for preview; will be replaced in Step 3
-  const [stubPlayerChoice, setStubPlayerChoice] = useState(null);
-  const [stubComputerChoice, setStubComputerChoice] = useState(null);
-  const [stubOutcome, setStubOutcome] = useState('');
-  const [stubScores, setStubScores] = useState({ player: 0, computer: 0, draw: 0 });
 
   // Apply theme to the root element for CSS variable switching
   useEffect(() => {
@@ -39,29 +36,14 @@ function App() {
     [theme]
   );
 
-  // placeholder handlers to prove wiring; will be replaced by real logic
-  const handleSelect = (choice) => {
-    setStubPlayerChoice(choice);
-    // simple fake computer choice rotation for preview
-    const order = ['rock', 'paper', 'scissors'];
-    const idx = order.indexOf(choice);
-    const comp = order[(idx + 1) % order.length];
-    setStubComputerChoice(comp);
-    setStubOutcome(`You picked ${choice}. Computer picked ${comp}. (Outcome TBD)`);
-  };
+  // Use game hook
+  const {
+    scores,
+    currentRound,
+    actions: { selectChoice, playAgain, resetScores },
+  } = useRPSGame();
 
-  const handlePlayAgain = () => {
-    setStubPlayerChoice(null);
-    setStubComputerChoice(null);
-    setStubOutcome('');
-  };
-
-  const handleReset = () => {
-    setStubScores({ player: 0, computer: 0, draw: 0 });
-    handlePlayAgain();
-  };
-
-  const canPlayAgain = Boolean(stubPlayerChoice || stubComputerChoice);
+  const canPlayAgain = Boolean(currentRound.playerChoice || currentRound.computerChoice);
 
   return (
     <div className="App">
@@ -92,24 +74,24 @@ function App() {
           </div>
 
           <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
-            <ChoiceGrid onSelect={handleSelect} disabled={false} />
+            <ChoiceGrid onSelect={selectChoice} disabled={false} />
 
             <ResultPanel
-              playerChoice={stubPlayerChoice}
-              computerChoice={stubComputerChoice}
-              outcomeText={stubOutcome}
+              playerChoice={currentRound.playerChoice}
+              computerChoice={currentRound.computerChoice}
+              outcomeText={currentRound.text}
             />
 
             <ScoreBoard
-              player={stubScores.player}
-              computer={stubScores.computer}
-              draw={stubScores.draw}
+              player={scores.player}
+              computer={scores.computer}
+              draw={scores.draw}
             />
 
             <ControlsBar
               canPlayAgain={canPlayAgain}
-              onPlayAgain={handlePlayAgain}
-              onReset={handleReset}
+              onPlayAgain={playAgain}
+              onReset={resetScores}
             />
           </div>
         </Card>
