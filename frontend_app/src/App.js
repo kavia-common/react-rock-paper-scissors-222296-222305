@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useState as useReactState } from 'react';
 import './App.css';
 import './index.css';
 import Header from './components/Layout/Header';
@@ -12,6 +12,7 @@ import ControlsBar from './components/Game/ControlsBar';
 
 // Step 3: game hook
 import useRPSGame from './hooks/useRPSGame';
+import { isAuthenticated, logout, subscribeAuth } from './utils/auth';
 
 /**
  * PUBLIC_INTERFACE
@@ -20,11 +21,22 @@ import useRPSGame from './hooks/useRPSGame';
  */
 function App() {
   const [theme, setTheme] = useState('light');
+  const [authed, setAuthed] = useReactState(isAuthenticated());
+  const [authAnnounce, setAuthAnnounce] = useReactState('');
 
   // Apply theme to the root element for CSS variable switching
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Keep auth state in sync across tabs
+  useEffect(() => {
+    const unsubscribe = subscribeAuth((val) => {
+      setAuthed(val);
+      setAuthAnnounce(val ? 'Logged in' : 'Logged out');
+    });
+    return unsubscribe;
+  }, []);
 
   // PUBLIC_INTERFACE
   const toggleTheme = () => {
@@ -47,34 +59,56 @@ function App() {
 
   const canPlayAgain = Boolean(currentRound.playerChoice || currentRound.computerChoice);
 
+  const headerActions = (
+    <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+      <button
+        className="theme-toggle"
+        onClick={toggleTheme}
+        aria-label={`Switch to ${themeLabel} mode`}
+        title={`Switch to ${themeLabel} mode`}
+      >
+        <span className="theme-toggle__icon" aria-hidden>
+          {theme === 'light' ? '🌙' : '☀️'}
+        </span>
+        {themeLabel} Mode
+      </button>
+      {authed ? (
+        <a
+          href="/login"
+          className="btn btn--outline"
+          aria-label="Logout"
+          title="Logout"
+          onClick={(e) => {
+            e.preventDefault();
+            logout();
+            setAuthed(false);
+            setAuthAnnounce('Logged out');
+            // Navigate by assigning href to avoid requiring hooks in Header
+            window.location.assign('/login');
+          }}
+          style={{ minHeight: 44 }}
+        >
+          Logout
+        </a>
+      ) : (
+        <a
+          href="/login"
+          className="btn btn--outline"
+          aria-label="Go to Login"
+          title="Go to Login"
+          style={{ minHeight: 44 }}
+        >
+          Login
+        </a>
+      )}
+    </div>
+  );
+
   return (
     <div className="App">
       <Header
         title="Rock Paper Scissors"
-        actions={
-          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
-            <button
-              className="theme-toggle"
-              onClick={toggleTheme}
-              aria-label={`Switch to ${themeLabel} mode`}
-              title={`Switch to ${themeLabel} mode`}
-            >
-              <span className="theme-toggle__icon" aria-hidden>
-                {theme === 'light' ? '🌙' : '☀️'}
-              </span>
-              {themeLabel} Mode
-            </button>
-            <a
-              href="/login"
-              className="btn btn--outline"
-              aria-label="Go to Login"
-              title="Go to Login"
-              style={{ minHeight: 44 }}
-            >
-              Login
-            </a>
-          </div>
-        }
+        actions={headerActions}
       />
       <main className="App__main container-center">
         <Card>
@@ -86,30 +120,34 @@ function App() {
             <div aria-hidden />
           </div>
 
+          <div aria-live="polite" aria-atomic="true" className="visually-hidden">
+            {authAnnounce}
+          </div>
+
           <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
-            <ChoiceGrid onSelect={selectChoice} disabled={false} />
+            <ChoiceGrid onSelect={selectChoice} disabled={!authed} />
 
             <ResultPanel
-              playerChoice={currentRound.playerChoice}
-              computerChoice={currentRound.computerChoice}
-              outcomeText={currentRound.text}
-              outcome={currentRound.outcome}
-              aiPersonalityOn={featureFlags?.hasAiPersonality && personalityEnabled}
+              playerChoice={authed ? currentRound.playerChoice : null}
+              computerChoice={authed ? currentRound.computerChoice : null}
+              outcomeText={authed ? currentRound.text : 'Please log in to play.'}
+              outcome={authed ? currentRound.outcome : null}
+              aiPersonalityOn={authed && featureFlags?.hasAiPersonality && personalityEnabled}
             />
 
             <ScoreBoard
-              player={scores.player}
-              computer={scores.computer}
-              draw={scores.draw}
+              player={authed ? scores.player : 0}
+              computer={authed ? scores.computer : 0}
+              draw={authed ? scores.draw : 0}
             />
 
             <ControlsBar
-              canPlayAgain={canPlayAgain}
-              onPlayAgain={playAgain}
-              onReset={resetScores}
-              hasAiPersonality={featureFlags?.hasAiPersonality}
-              personalityEnabled={personalityEnabled}
-              onTogglePersonality={togglePersonality}
+              canPlayAgain={authed && canPlayAgain}
+              onPlayAgain={authed ? playAgain : undefined}
+              onReset={authed ? resetScores : undefined}
+              hasAiPersonality={authed && featureFlags?.hasAiPersonality}
+              personalityEnabled={authed && personalityEnabled}
+              onTogglePersonality={authed ? togglePersonality : undefined}
             />
           </div>
         </Card>

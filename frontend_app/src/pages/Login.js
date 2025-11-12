@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import Card from '../components/Layout/Card';
 import Header from '../components/Layout/Header';
 import { isValidEmail, isValidPassword } from '../utils/validation';
+import { login as authLogin } from '../utils/auth';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
  * PUBLIC_INTERFACE
  * Login - A centered, themed login page with email/password fields and client-side validation.
  * Accessibility: Proper labels, aria-invalid, error messages with aria-live, and keyboard-friendly controls.
- * Note: Submit is a no-op (console.log) for now; no backend calls are made.
+ * After successful submit, sets a local auth flag and navigates to the game route.
  */
 function Login() {
   const [theme, setTheme] = useState('light');
@@ -15,6 +17,9 @@ function Login() {
   const [password, setPassword] = useState('');
   const [touched, setTouched] = useState({ email: false, password: false });
   const [submitted, setSubmitted] = useState(false);
+  const [announce, setAnnounce] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const emailError = touched.email || submitted ? (!isValidEmail(email) ? 'Enter a valid email address.' : '') : '';
   const passwordError = touched.password || submitted ? (!isValidPassword(password) ? 'Password must be at least 6 characters.' : '') : '';
@@ -41,9 +46,11 @@ function Login() {
       }
       return;
     }
-    // No-op for now; replace with real auth call later
-    // PUBLIC_INTERFACE
-    console.log('Login submitted:', { email, password: '[REDACTED]' });
+    // Set auth flag and navigate to intended page or home
+    authLogin();
+    setAnnounce('Login successful. Redirecting to the game.');
+    const redirectTo = location?.state?.from || '/';
+    navigate(redirectTo, { replace: true });
   };
 
   const headerActions = (
@@ -71,6 +78,10 @@ function Login() {
               <p className="rps-card__subtitle" id="login-desc">Sign in to continue</p>
             </div>
             <div aria-hidden />
+          </div>
+
+          <div aria-live="polite" aria-atomic="true" className="visually-hidden">
+            {announce}
           </div>
 
           <form onSubmit={handleSubmit} aria-labelledby="login-title" aria-describedby="login-desc" noValidate>
