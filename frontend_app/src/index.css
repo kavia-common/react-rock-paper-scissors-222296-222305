@@ -137,6 +137,7 @@ a:hover {
   cursor: pointer;
   transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  will-change: transform, box-shadow;
 }
 
 .btn:hover {
@@ -146,6 +147,14 @@ a:hover {
 
 .btn:active {
   transform: translateY(0);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .theme-toggle {
+    transition: none !important;
+  }
 }
 
 .btn--outline {

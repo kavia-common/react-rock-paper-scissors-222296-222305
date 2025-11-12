@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 function Card({ children, className, as: Tag }) {
   return (
-    <Tag className={`rps-card ${className || ''}`.trim()} role="region">
+    <Tag className={`rps-card animate-pop ${className || ''}`.trim()} role="region">
       {children}
     </Tag>
   );

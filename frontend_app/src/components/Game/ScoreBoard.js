@@ -25,7 +25,12 @@ function ScoreBoard({ player, computer, draw }) {
       aria-label={`${label} score ${value}`}
     >
       <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{label}</div>
-      <div style={{ fontWeight: 800, fontSize: '1.25rem' }}>{value}</div>
+      <div
+        className="score-flash animate-pulse-once"
+        style={{ fontWeight: 800, fontSize: '1.25rem' }}
+      >
+        {value}
+      </div>
     </div>
   );
 

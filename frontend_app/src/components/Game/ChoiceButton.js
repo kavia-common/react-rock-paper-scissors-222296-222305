@@ -28,7 +28,7 @@ function ChoiceButton({ label, value, icon, onSelect, disabled }) {
   return (
     <button
       type="button"
-      className="btn btn--outline"
+      className="btn btn--outline choice-btn"
       aria-label={`Choose ${label}`}
       title={`Choose ${label}`}
       onClick={handleClick}

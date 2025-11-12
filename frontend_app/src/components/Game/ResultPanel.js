@@ -20,13 +20,10 @@ function ResultPanel({ playerChoice, computerChoice, outcomeText }) {
     <div
       role="status"
       aria-live="polite"
+      className="result-panel animate-fade-in-up"
       style={{
         display: 'grid',
         gap: 'var(--space-3)',
-        border: '1px solid var(--border-color, rgba(0,0,0,0.08))',
-        borderRadius: 'var(--radius-md)',
-        padding: 'var(--space-4)',
-        background: 'rgba(0,0,0,0.02)',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
