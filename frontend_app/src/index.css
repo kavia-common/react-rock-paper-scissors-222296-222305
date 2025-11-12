@@ -210,3 +210,14 @@ input[type="password"]:focus {
   box-shadow: 0 0 0 3px var(--ring-color), 0 0 0 5px rgba(0,0,0,0.06);
   border-radius: 8px;
 }
+
+/* Image card hover for better affordance */
+@media (hover: hover) {
+  [role="option"] {
+    transition: transform .12s ease, box-shadow .2s ease, border-color .15s ease;
+  }
+  [role="option"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37,99,235,0.18);
+  }
+}

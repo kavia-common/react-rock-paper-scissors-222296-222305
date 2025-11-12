@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../components/Layout/Card';
 import Header from '../components/Layout/Header';
 import { login as authLogin, saveUserProfile } from '../utils/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
+import narutoImg from '../assets/anime/naruto.png';
+import onePieceImg from '../assets/anime/one-piece.png';
+import demonSlayerImg from '../assets/anime/demon-slayer.png';
+import aotImg from '../assets/anime/attack-on-titan.png';
+import mhaImg from '../assets/anime/my-hero-academia.png';
+import placeholderImg from '../assets/anime/placeholder.png';
 
 /**
  * PUBLIC_INTERFACE
  * Login - A centered, themed login page that collects a display name and an anime selection.
- * Accessibility: Proper labels, aria-invalid, error messages with aria-live, and keyboard-friendly controls.
- * On submit, persists { isAuthed: true, name, anime } to client-side auth storage and routes via existing gating.
+ * Now presents anime options as selectable image cards with keyboard accessibility.
+ * On submit, persists { isAuthed: true, name, anime, animeImageUrl } to client-side auth storage and routes via existing gating.
  */
 function Login() {
   const [theme, setTheme] = useState('light');
   const [name, setName] = useState('');
-  const [anime, setAnime] = useState('');
+  const [selectedAnime, setSelectedAnime] = useState(null); // { id, label, img }
   const [touched, setTouched] = useState({ name: false, anime: false });
   const [submitted, setSubmitted] = useState(false);
   const [announce, setAnnounce] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Simple validation rules: non-empty trimmed name, and one anime selected
-  const nameError = (touched.name || submitted) ? (!name.trim() ? 'Please enter your name.' : '') : '';
-  const animeError = (touched.anime || submitted) ? (!anime ? 'Please select your favorite anime.' : '') : '';
-
-  const hasErrors = Boolean(nameError || animeError);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
@@ -32,22 +32,39 @@ function Login() {
     document.documentElement.setAttribute('data-theme', next);
   };
 
+  // Grid options with images
+  const animeOptions = useMemo(() => ([
+    { id: 'naruto', label: 'Naruto', img: narutoImg || placeholderImg },
+    { id: 'one-piece', label: 'One Piece', img: onePieceImg || placeholderImg },
+    { id: 'demon-slayer', label: 'Demon Slayer', img: demonSlayerImg || placeholderImg },
+    { id: 'attack-on-titan', label: 'Attack on Titan', img: aotImg || placeholderImg },
+    { id: 'my-hero-academia', label: 'My Hero Academia', img: mhaImg || placeholderImg },
+  ]), []);
+
+  // Validation
+  const nameError = (touched.name || submitted) ? (!name.trim() ? 'Please enter your name.' : '') : '';
+  const animeError = (touched.anime || submitted) ? (!selectedAnime ? 'Please select your favorite anime.' : '') : '';
+  const hasErrors = Boolean(nameError || animeError);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
     if (hasErrors) {
-      // focus first invalid field
       if (nameError) {
         const el = document.getElementById('name');
         if (el) el.focus();
       } else if (animeError) {
-        const el = document.getElementById('anime');
+        const el = document.getElementById('anime-grid');
         if (el) el.focus();
       }
       return;
     }
     // Persist profile and set auth flag
-    saveUserProfile({ name: name.trim(), anime });
+    saveUserProfile({
+      name: name.trim(),
+      anime: selectedAnime?.id || '',
+      animeImageUrl: selectedAnime?.img || '',
+    });
     authLogin();
     setAnnounce('Welcome! Profile saved. Redirecting to the game.');
     const redirectTo = location?.state?.from || '/';
@@ -68,15 +85,15 @@ function Login() {
     </button>
   );
 
-  // Available anime options (can be extended easily)
-  const animeOptions = [
-    { value: '', label: 'Select an anime...', disabled: true },
-    { value: 'naruto', label: 'Naruto' },
-    { value: 'one-piece', label: 'One Piece' },
-    { value: 'demon-slayer', label: 'Demon Slayer' },
-    { value: 'attack-on-titan', label: 'Attack on Titan' },
-    { value: 'my-hero-academia', label: 'My Hero Academia' },
-  ];
+  // Keyboard handlers for cards
+  const handleCardKeyDown = (e, opt) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelectedAnime(opt);
+      setTouched((t) => ({ ...t, anime: true }));
+      setAnnounce(`${opt.label} selected`);
+    }
+  };
 
   return (
     <div className="App">
@@ -136,34 +153,73 @@ function Login() {
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="anime" style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
-                  Favorite Anime
-                </label>
-                <select
-                  id="anime"
-                  name="anime"
-                  value={anime}
-                  onChange={(e) => setAnime(e.target.value)}
-                  onBlur={() => setTouched((t) => ({ ...t, anime: true }))}
-                  aria-invalid={animeError ? 'true' : 'false'}
+              <fieldset
+                id="anime-grid"
+                aria-label="Favorite Anime"
+                style={{ border: 'none', padding: 0, margin: 0 }}
+              >
+                <legend style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>Favorite Anime</legend>
+                <div
+                  role="listbox"
+                  aria-label="Anime choices"
                   aria-describedby={animeError ? 'anime-error' : undefined}
+                  tabIndex={0}
+                  onFocus={() => setTouched((t) => ({ ...t, anime: true }))}
                   style={{
-                    width: '100%',
-                    padding: '0.625rem 0.75rem',
-                    borderRadius: '10px',
-                    border: `1px solid ${animeError ? 'var(--color-error)' : 'rgba(0,0,0,0.1)'}`,
-                    background: 'var(--color-surface)',
-                    color: 'var(--color-text)',
-                    minHeight: 44,
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                    gap: 'var(--space-3)',
                   }}
                 >
-                  {animeOptions.map(opt => (
-                    <option key={opt.value || 'placeholder'} value={opt.value} disabled={opt.disabled}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  {animeOptions.map((opt) => {
+                    const selected = selectedAnime?.id === opt.id;
+                    return (
+                      <div
+                        key={opt.id}
+                        role="option"
+                        aria-selected={selected ? 'true' : 'false'}
+                        aria-label={opt.label}
+                        tabIndex={0}
+                        onKeyDown={(e) => handleCardKeyDown(e, opt)}
+                        onClick={() => {
+                          setSelectedAnime(opt);
+                          setTouched((t) => ({ ...t, anime: true }));
+                          setAnnounce(`${opt.label} selected`);
+                        }}
+                        title={opt.label}
+                        style={{
+                          cursor: 'pointer',
+                          borderRadius: '12px',
+                          border: selected ? '2px solid var(--color-primary)' : '1px solid rgba(0,0,0,0.1)',
+                          background: 'var(--color-surface)',
+                          boxShadow: selected ? '0 0 0 3px var(--ring-color)' : 'var(--shadow-sm)',
+                          overflow: 'hidden',
+                          transition: 'transform .12s ease, box-shadow .2s ease, border-color .15s ease',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '100%',
+                            aspectRatio: '16 / 10',
+                            background: `center / cover no-repeat url(${opt.img || placeholderImg})`,
+                          }}
+                          aria-hidden="true"
+                        />
+                        <div
+                          style={{
+                            padding: '0.5rem 0.75rem',
+                            fontWeight: 600,
+                            textAlign: 'center',
+                            color: 'var(--color-text)',
+                            background: selected ? 'rgba(37,99,235,0.06)' : 'transparent',
+                          }}
+                        >
+                          {opt.label}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
                 <div
                   id="anime-error"
                   role="alert"
@@ -177,7 +233,7 @@ function Login() {
                 >
                   {animeError}
                 </div>
-              </div>
+              </fieldset>
 
               <button
                 type="submit"

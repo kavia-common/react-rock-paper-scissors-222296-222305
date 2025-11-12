@@ -64,8 +64,23 @@ function App() {
   const headerActions = (
     <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
       {authed && profile?.name && (
-        <span aria-label={`Logged in as ${profile.name}`} title={`Logged in as ${profile.name}`} style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>
-          {profile.name} {profile.anime ? `• ${profile.anime}` : ''}
+        <span
+          aria-label={`Logged in as ${profile.name}`}
+          title={`Logged in as ${profile.name}`}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--color-text-muted)', fontWeight: 600 }}
+        >
+          {profile?.animeImageUrl ? (
+            <img
+              src={profile.animeImageUrl}
+              alt={profile.anime ? `${profile.anime} avatar` : 'Profile avatar'}
+              width="28"
+              height="28"
+              style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.1)' }}
+            />
+          ) : null}
+          <span>
+            {profile.name} {profile.anime ? `• ${profile.anime}` : ''}
+          </span>
         </span>
       )}
       <button

@@ -65,13 +65,16 @@ export function subscribeAuth(cb) {
 export function saveUserProfile(profile) {
   /**
    * Saves user profile metadata to localStorage.
-   * profile: { name: string, anime: string }
+   * PUBLIC_INTERFACE
+   * profile: { name: string, anime: string, animeImageUrl?: string }
+   * animeImageUrl is optional and used for displaying the selected anime image in the UI.
    */
   try {
     if (typeof window === 'undefined' || !window.localStorage) return;
     const safe = {
       name: String(profile?.name || '').slice(0, 100),
       anime: String(profile?.anime || '').slice(0, 100),
+      animeImageUrl: String(profile?.animeImageUrl || '').slice(0, 500),
     };
     window.localStorage.setItem(PROFILE_KEY, JSON.stringify(safe));
   } catch {
@@ -83,6 +86,8 @@ export function saveUserProfile(profile) {
 export function getUserProfile() {
   /**
    * Retrieves saved user profile, or null if unavailable/invalid.
+   * PUBLIC_INTERFACE
+   * Returns: { name: string, anime: string, animeImageUrl?: string } | null
    */
   try {
     if (typeof window === 'undefined' || !window.localStorage) return null;
@@ -91,8 +96,9 @@ export function getUserProfile() {
     const parsed = JSON.parse(raw);
     const name = typeof parsed?.name === 'string' ? parsed.name : '';
     const anime = typeof parsed?.anime === 'string' ? parsed.anime : '';
+    const animeImageUrl = typeof parsed?.animeImageUrl === 'string' ? parsed.animeImageUrl : '';
     if (!name && !anime) return null;
-    return { name, anime };
+    return { name, anime, animeImageUrl };
   } catch {
     return null;
   }
