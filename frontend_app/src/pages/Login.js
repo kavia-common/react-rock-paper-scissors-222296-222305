@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
 import Card from '../components/Layout/Card';
 import Header from '../components/Layout/Header';
-import { isValidEmail, isValidPassword } from '../utils/validation';
-import { login as authLogin } from '../utils/auth';
+import { login as authLogin, saveUserProfile } from '../utils/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
  * PUBLIC_INTERFACE
- * Login - A centered, themed login page with email/password fields and client-side validation.
+ * Login - A centered, themed login page that collects a display name and an anime selection.
  * Accessibility: Proper labels, aria-invalid, error messages with aria-live, and keyboard-friendly controls.
- * After successful submit, sets a local auth flag and navigates to the game route.
+ * On submit, persists { isAuthed: true, name, anime } to client-side auth storage and routes via existing gating.
  */
 function Login() {
   const [theme, setTheme] = useState('light');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [touched, setTouched] = useState({ email: false, password: false });
+  const [name, setName] = useState('');
+  const [anime, setAnime] = useState('');
+  const [touched, setTouched] = useState({ name: false, anime: false });
   const [submitted, setSubmitted] = useState(false);
   const [announce, setAnnounce] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
-  const emailError = touched.email || submitted ? (!isValidEmail(email) ? 'Enter a valid email address.' : '') : '';
-  const passwordError = touched.password || submitted ? (!isValidPassword(password) ? 'Password must be at least 6 characters.' : '') : '';
+  // Simple validation rules: non-empty trimmed name, and one anime selected
+  const nameError = (touched.name || submitted) ? (!name.trim() ? 'Please enter your name.' : '') : '';
+  const animeError = (touched.anime || submitted) ? (!anime ? 'Please select your favorite anime.' : '') : '';
 
-  const hasErrors = Boolean(emailError || passwordError);
+  const hasErrors = Boolean(nameError || animeError);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
@@ -37,18 +37,19 @@ function Login() {
     setSubmitted(true);
     if (hasErrors) {
       // focus first invalid field
-      if (emailError) {
-        const el = document.getElementById('email');
+      if (nameError) {
+        const el = document.getElementById('name');
         if (el) el.focus();
-      } else if (passwordError) {
-        const el = document.getElementById('password');
+      } else if (animeError) {
+        const el = document.getElementById('anime');
         if (el) el.focus();
       }
       return;
     }
-    // Set auth flag and navigate to intended page or home
+    // Persist profile and set auth flag
+    saveUserProfile({ name: name.trim(), anime });
     authLogin();
-    setAnnounce('Login successful. Redirecting to the game.');
+    setAnnounce('Welcome! Profile saved. Redirecting to the game.');
     const redirectTo = location?.state?.from || '/';
     navigate(redirectTo, { replace: true });
   };
@@ -67,6 +68,16 @@ function Login() {
     </button>
   );
 
+  // Available anime options (can be extended easily)
+  const animeOptions = [
+    { value: '', label: 'Select an anime...', disabled: true },
+    { value: 'naruto', label: 'Naruto' },
+    { value: 'one-piece', label: 'One Piece' },
+    { value: 'demon-slayer', label: 'Demon Slayer' },
+    { value: 'attack-on-titan', label: 'Attack on Titan' },
+    { value: 'my-hero-academia', label: 'My Hero Academia' },
+  ];
+
   return (
     <div className="App">
       <Header title="Login" actions={headerActions} />
@@ -74,8 +85,8 @@ function Login() {
         <Card className="animate-pop">
           <div className="rps-card__header">
             <div>
-              <h2 className="rps-card__title" id="login-title">Welcome back</h2>
-              <p className="rps-card__subtitle" id="login-desc">Sign in to continue</p>
+              <h2 className="rps-card__title" id="login-title">Welcome</h2>
+              <p className="rps-card__subtitle" id="login-desc">Enter your name and pick an anime to continue</p>
             </div>
             <div aria-hidden />
           </div>
@@ -87,31 +98,31 @@ function Login() {
           <form onSubmit={handleSubmit} aria-labelledby="login-title" aria-describedby="login-desc" noValidate>
             <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
               <div>
-                <label htmlFor="email" style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
-                  Email
+                <label htmlFor="name" style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
+                  Name
                 </label>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => setTouched((t) => ({ ...t, email: true }))}
-                  aria-invalid={emailError ? 'true' : 'false'}
-                  aria-describedby={emailError ? 'email-error' : undefined}
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="nickname"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={() => setTouched((t) => ({ ...t, name: true }))}
+                  aria-invalid={nameError ? 'true' : 'false'}
+                  aria-describedby={nameError ? 'name-error' : undefined}
                   style={{
                     width: '100%',
                     padding: '0.625rem 0.75rem',
                     borderRadius: '10px',
-                    border: `1px solid ${emailError ? 'var(--color-error)' : 'rgba(0,0,0,0.1)'}`,
+                    border: `1px solid ${nameError ? 'var(--color-error)' : 'rgba(0,0,0,0.1)'}`,
                     background: 'var(--color-surface)',
                     color: 'var(--color-text)',
                     minHeight: 44,
                   }}
                 />
                 <div
-                  id="email-error"
+                  id="name-error"
                   role="alert"
                   aria-live="polite"
                   style={{
@@ -121,36 +132,40 @@ function Login() {
                     fontSize: '0.9rem',
                   }}
                 >
-                  {emailError}
+                  {nameError}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="password" style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
-                  Password
+                <label htmlFor="anime" style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
+                  Favorite Anime
                 </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={() => setTouched((t) => ({ ...t, password: true }))}
-                  aria-invalid={passwordError ? 'true' : 'false'}
-                  aria-describedby={passwordError ? 'password-error' : undefined}
+                <select
+                  id="anime"
+                  name="anime"
+                  value={anime}
+                  onChange={(e) => setAnime(e.target.value)}
+                  onBlur={() => setTouched((t) => ({ ...t, anime: true }))}
+                  aria-invalid={animeError ? 'true' : 'false'}
+                  aria-describedby={animeError ? 'anime-error' : undefined}
                   style={{
                     width: '100%',
                     padding: '0.625rem 0.75rem',
                     borderRadius: '10px',
-                    border: `1px solid ${passwordError ? 'var(--color-error)' : 'rgba(0,0,0,0.1)'}`,
+                    border: `1px solid ${animeError ? 'var(--color-error)' : 'rgba(0,0,0,0.1)'}`,
                     background: 'var(--color-surface)',
                     color: 'var(--color-text)',
                     minHeight: 44,
                   }}
-                />
+                >
+                  {animeOptions.map(opt => (
+                    <option key={opt.value || 'placeholder'} value={opt.value} disabled={opt.disabled}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
                 <div
-                  id="password-error"
+                  id="anime-error"
                   role="alert"
                   aria-live="polite"
                   style={{
@@ -160,7 +175,7 @@ function Login() {
                     fontSize: '0.9rem',
                   }}
                 >
-                  {passwordError}
+                  {animeError}
                 </div>
               </div>
 
@@ -168,10 +183,10 @@ function Login() {
                 type="submit"
                 className="btn"
                 style={{ width: '100%' }}
-                aria-label="Submit login"
-                title="Submit login"
+                aria-label="Submit profile"
+                title="Submit profile"
               >
-                Sign In
+                Continue
               </button>
             </div>
           </form>

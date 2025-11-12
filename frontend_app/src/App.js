@@ -12,7 +12,7 @@ import ControlsBar from './components/Game/ControlsBar';
 
 // Step 3: game hook
 import useRPSGame from './hooks/useRPSGame';
-import { isAuthenticated, logout, subscribeAuth } from './utils/auth';
+import { isAuthenticated, logout, subscribeAuth, getUserProfile } from './utils/auth';
 
 /**
  * PUBLIC_INTERFACE
@@ -23,6 +23,7 @@ function App() {
   const [theme, setTheme] = useState('light');
   const [authed, setAuthed] = useReactState(isAuthenticated());
   const [authAnnounce, setAuthAnnounce] = useReactState('');
+  const [profile, setProfile] = useReactState(getUserProfile());
 
   // Apply theme to the root element for CSS variable switching
   useEffect(() => {
@@ -34,6 +35,7 @@ function App() {
     const unsubscribe = subscribeAuth((val) => {
       setAuthed(val);
       setAuthAnnounce(val ? 'Logged in' : 'Logged out');
+      setProfile(getUserProfile());
     });
     return unsubscribe;
   }, []);
@@ -61,6 +63,11 @@ function App() {
 
   const headerActions = (
     <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+      {authed && profile?.name && (
+        <span aria-label={`Logged in as ${profile.name}`} title={`Logged in as ${profile.name}`} style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>
+          {profile.name} {profile.anime ? `• ${profile.anime}` : ''}
+        </span>
+      )}
       <button
         className="theme-toggle"
         onClick={toggleTheme}
